@@ -1,18 +1,34 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+	router := gin.Default()
+	// basic route
+	router.GET("/", func(c *gin.Context) {
+		c.String(200, "Welcome")
 	})
 
-	// Say hi
-	r.GET("/hi", func(c *gin.Context) {
-		c.String(200, "Hello World!")
+	// more result
+	router.GET("/more", func(c *gin.Context) {
+		c.String(200, "More page")
 	})
-	r.Run() // listen and serve on 0.0.0.0:8080
+
+	// query result page
+	router.GET("/result", func(c *gin.Context) {
+		c.String(200, "Result page")
+	})
+
+	// POST query and return json string with query item
+	router.POST("/", func(c *gin.Context) {
+		query := c.PostForm("query")
+		fmt.Printf("Your query item is: %s", query)
+		c.JSON(200, gin.H{"result": query, "status": http.StatusOK})
+	})
+	router.Run() // listen and serve on 0.0.0.0:8080
 }
