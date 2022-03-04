@@ -63,6 +63,8 @@ func search(useProxy bool) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer response.Body.Close()
+
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)

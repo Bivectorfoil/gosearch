@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,6 +9,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+type result struct {
+	Title string `json:"title"`
+	Link  string `json:"link"`
+}
+
+type resultItems struct {
+	Items []result `json:"items"`
+}
 
 func main() {
 	router := gin.Default()
@@ -18,9 +28,13 @@ func main() {
 
 	// basic search route
 	router.GET("/search", func(c *gin.Context) {
-		results := search(true)
+		resp := search(true)
+		results := &resultItems{}
+
+		json.Unmarshal(resp, results)
+
 		log.Printf("typeof results: %s", reflect.TypeOf(results))
-		c.String(http.StatusOK, string(results))
+		c.JSON(http.StatusOK, results)
 	})
 
 	// more result
