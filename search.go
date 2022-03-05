@@ -12,30 +12,16 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func search(useProxy bool) []byte {
-	// test go request
-	// resp, err := requests.Get("http://www.zhanluejia.net.cn")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-	// fmt.Println(resp.Text())
-
+func search(queryItem string) []byte {
 	// read CSE_ID and CSE_KEY from .env file with godotenv package
 	godotenv.Load()
 	CSEID := os.Getenv("CSE_ID")
 	CSEKEY := os.Getenv("CSE_KEY")
-	PROXY_HOST := ""
-	if useProxy {
-		// read proxy url from .env file with godotenv package
-		PROXY_HOST = os.Getenv("PROXY_HOST")
-	}
-
-	fmt.Printf("cse_id is %s\n, cse_key is %s\n, proxy is %s\n", CSEID, CSEKEY, PROXY_HOST)
+	PROXY_HOST := os.Getenv("PROXY_HOST")
 
 	params := map[string]interface{}{
 		"cx":    CSEID,
-		"q":     "golang",
+		"q":     queryItem,
 		"key":   CSEKEY,
 		"num":   10,
 		"start": 1,
