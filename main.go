@@ -7,14 +7,33 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type result struct {
+type Result struct {
 	Title   string `json:"title"`
 	Link    string `json:"link"`
-	Snippet string `json:"Snippet"`
+	Snippet string `json:"snippet"`
 }
 
-type resultItems struct {
-	Items []result `json:"items"`
+type SearchInformation struct {
+	SearchTime   int    `json:"searchTime"`
+	TotalResults string `json:"totalResults"`
+}
+
+type Queries struct {
+	PreviousPage []struct {
+		StartIndex int `json:"startIndex"`
+	}
+	NextPage []struct {
+		StartIndex int `json:"startIndex"`
+	}
+	Request []struct {
+		SearchTerms string `json:"searchTerms"`
+	}
+}
+
+type CSERespnse struct {
+	Items      []Result          `json:"items"`
+	SearchInfo SearchInformation `json:"searchInformation"`
+	Queries    Queries           `json:"queries"`
 }
 
 func main() {
@@ -30,14 +49,15 @@ func main() {
 	router.POST("/", func(c *gin.Context) {
 		query := c.PostForm("search")
 		resp := search(query)
-		results := &resultItems{}
+		results := &CSERespnse{}
 		json.Unmarshal(resp, results)
 		// POST redirect to avoid resubmit form
 		c.Redirect(http.StatusMovedPermanently, "/")
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"title":      "query finished at",
 			"query_item": query,
 			"items":      results.Items,
+			"searchInfo": results.SearchInfo,
+			"results":    results,
 		})
 
 	})
@@ -45,7 +65,7 @@ func main() {
 	// basic search route
 	router.GET("/search", func(c *gin.Context) {
 		resp := search("golang")
-		results := &resultItems{}
+		results := &CSERespnse{}
 
 		json.Unmarshal(resp, results)
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{

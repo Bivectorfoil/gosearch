@@ -1,20 +1,37 @@
 <html>
 	<h1><a href="/">GoSearch</a></h1>
     <form method="POST">
-        <input type="text" placeholder="type anything" name="search" /><br />
-        <input type="submit" />
+			<input type="text" placeholder="type anything" name="search" /><br />
+			<input type="submit" />
     </form>
-	{{ if .title }}
-	<h1>{{ .title }}</h1>
-	{{ end }}
 	{{ if .items }}
-	<h2>
-		You query <u>{{ .query_item }}</u> result is: 
-	</h2>
-		{{ range .items }} 
-			<h3>{{ .Title }}</h3>
+	<div class="resultstates" id="resultStates">
+		"获得约 {{ .searchInfo.TotalResults }} 条结果"
+		<nobr> （用时 {{ .searchInfo.SearchTime }} 秒）</nobr>
+  </div>
+	{{ range .items }} 
+		<h3>{{ .Title }}</h3>
 			<a href="{{ .Link }}" target="_blank">{{ .Link }}</a>
-			<p>{{ .Snippet }}</p>
-		{{ end }}
+		<p>{{ .Snippet }}</p>
+	{{ end }}
 	{{ end }} 
+	<div class="footer">
+		<table id="nav">
+			<tbody>
+				<tr valign="top">
+					<td class="previous">
+					{{ if .results.Queries.PreviousPage }}
+					<span class="previous">Previous</span>
+					{{ end }}
+					</td>
+
+					<td class="next">
+					{{ if .results.Queries.NextPage }}
+					<span class="next" style="color: blue">Next</span>
+					{{ end }}
+					</td>
+				</tr>
+			</tbody>
+  		</table>
+	</div>
 </html>
