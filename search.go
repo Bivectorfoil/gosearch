@@ -18,6 +18,7 @@ func search(queryItem string) []byte {
 	CSEID := os.Getenv("CSE_ID")
 	CSEKEY := os.Getenv("CSE_KEY")
 	PROXY_HOST := os.Getenv("PROXY_HOST")
+	fmt.Printf("PROXY_HOST: %s\n", PROXY_HOST)
 
 	params := map[string]interface{}{
 		"cx":    CSEID,

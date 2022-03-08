@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os/exec"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,6 +39,7 @@ type CSERespnse struct {
 }
 
 func main() {
+	initProxy()
 	router := gin.Default()
 	// load template file
 	router.LoadHTMLGlob("templates/*")
@@ -75,4 +78,15 @@ func main() {
 	})
 
 	router.Run() // listen and serve on 0.0.0.0:8080
+}
+
+func initProxy() {
+	// todo: check why failed
+	fmt.Println("init proxy")
+	// init proxy with script/setProxy.sh file
+	cmd := exec.Command("/bin/sh", "./script/setProxy.sh")
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+	}
 }
