@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,10 +24,12 @@ type SearchInformation struct {
 
 type Queries struct {
 	PreviousPage []struct {
-		StartIndex int `json:"startIndex"`
+		StartIndex  int    `json:"startIndex"`
+		SearchTerms string `json:"searchTerms"`
 	}
 	NextPage []struct {
-		StartIndex int `json:"startIndex"`
+		StartIndex  int    `json:"startIndex"`
+		SearchTerms string `json:"searchTerms"`
 	}
 	Request []struct {
 		SearchTerms string `json:"searchTerms"`
@@ -52,7 +55,7 @@ func main() {
 	// post route
 	router.POST("/", func(c *gin.Context) {
 		query := c.PostForm("search")
-		resp := search(query)
+		resp := search(query, 1)
 		results := &CSERespnse{}
 		json.Unmarshal(resp, results)
 		// POST redirect to avoid resubmit form
@@ -67,14 +70,18 @@ func main() {
 	})
 
 	// basic search route
-	router.GET("/search", func(c *gin.Context) {
-		resp := search("golang")
+	router.GET("/result", func(c *gin.Context) {
+		q := c.Query("q")
+		startIndex, _ := strconv.Atoi(c.Query("startIndex"))
+		resp := search(q, startIndex)
 		results := &CSERespnse{}
 
 		json.Unmarshal(resp, results)
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"search_item": "Golang",
-			"items":       results.Items,
+			"query_item": q,
+			"items":      results.Items,
+			"searchInfo": results.SearchInfo,
+			"results":    results,
 		})
 	})
 
@@ -82,7 +89,6 @@ func main() {
 }
 
 func initProxy() {
-	// todo: check why failed
 	fmt.Println("init proxy")
 	// init proxy with script/setProxy.sh file
 	cmd := exec.Command("/bin/bash", "-c", "./script/setProxy.sh")

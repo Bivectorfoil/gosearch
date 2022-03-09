@@ -21,13 +21,18 @@
 				<tr valign="top">
 					<td class="previous">
 					{{ if .results.Queries.PreviousPage }}
-					<span class="previous">Previous</span>
+					<a href="/result?q={{ (index .results.Queries.PreviousPage 0).SearchTerms }}&startIndex={{ (index .results.Queries.PreviousPage 0).StartIndex }}">
+						<span class="previous">Previous</span>
+					</a>
 					{{ end }}
 					</td>
 
 					<td class="next">
 					{{ if .results.Queries.NextPage }}
-					<span class="next" style="color: blue">Next</span>
+					<div>{{ (index .results.Queries.NextPage 0).SearchTerms }}</div>
+					<a href="/result?q={{ (index .results.Queries.NextPage 0).SearchTerms }}&startIndex={{ (index .results.Queries.NextPage 0).StartIndex }}">
+						<span class="next" style="color: blue">Next</span>
+					</a>
 					{{ end }}
 					</td>
 				</tr>

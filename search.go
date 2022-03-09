@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func search(queryItem string) []byte {
+func search(queryItem string, startIndex int) []byte {
 	// read CSE_ID and CSE_KEY from .env file with godotenv package
 	godotenv.Load()
 	CSEID := os.Getenv("CSE_ID")
@@ -24,7 +24,7 @@ func search(queryItem string) []byte {
 		"q":     queryItem,
 		"key":   CSEKEY,
 		"num":   10,
-		"start": 1,
+		"start": startIndex,
 	}
 
 	// creating proxy string
