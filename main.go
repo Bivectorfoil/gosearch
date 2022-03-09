@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -84,9 +85,15 @@ func initProxy() {
 	// todo: check why failed
 	fmt.Println("init proxy")
 	// init proxy with script/setProxy.sh file
-	cmd := exec.Command("/bin/sh", "./script/setProxy.sh")
+	cmd := exec.Command("/bin/bash", "-c", "./script/setProxy.sh")
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
 	err := cmd.Run()
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		fmt.Printf("Error: %s\nErr msg: %s\n", err, stderr.String())
+	} else {
+		fmt.Printf("%s\n", out.String())
 	}
 }
