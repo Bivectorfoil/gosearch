@@ -12,7 +12,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func search(queryItem string, startIndex int) []byte {
+const BASE_URL = "https://www.googleapis.com/customsearch/v1?"
+
+func search(queryItem string, startIndex int) ([]byte, error) {
 	// read CSE_ID and CSE_KEY from .env file with godotenv package
 	godotenv.Load()
 	CSEID := os.Getenv("CSE_ID")
@@ -21,7 +23,7 @@ func search(queryItem string, startIndex int) []byte {
 
 	params := map[string]interface{}{
 		"cx":    CSEID,
-		"q":     queryItem,
+		"q":     url.QueryEscape(queryItem),
 		"key":   CSEKEY,
 		"num":   10,
 		"start": startIndex,
@@ -30,33 +32,38 @@ func search(queryItem string, startIndex int) []byte {
 	// creating proxy string
 	proxyURL, err := url.Parse(PROXY_HOST)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return nil, err
 	}
 	transport := &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 	client := &http.Client{Transport: transport}
 
-	URL := "https://www.googleapis.com/customsearch/v1?"
-	url, err := url.Parse(URL + paramsToQuery(params))
+	rawUrl, err := url.Parse(BASE_URL + paramsToQuery(params))
 	if err != nil {
-		log.Fatal(err)
+		// log err and return
+		log.Print(err)
+		return nil, err
 	}
 	// generating the HTTP GET request through http proxy
-	request, err := http.NewRequest("GET", url.String(), nil)
+	request, err := http.NewRequest("GET", rawUrl.String(), nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return nil, err
 	}
 	response, err := client.Do(request)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return nil, err
 	}
 	defer response.Body.Close()
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return nil, err
 	}
 
-	return data
+	return data, nil
 }
 
 func paramsToQuery(params map[string]interface{}) string {

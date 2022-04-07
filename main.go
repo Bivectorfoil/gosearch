@@ -55,7 +55,14 @@ func main() {
 	// post route
 	router.POST("/", func(c *gin.Context) {
 		query := c.PostForm("search")
-		resp := search(query, 1)
+		resp, err := search(query, 1)
+		if err != nil {
+			fmt.Println(err)
+			c.HTML(http.StatusInternalServerError, "500.tmpl", gin.H{
+				"error": err,
+			})
+			return
+		}
 		results := &CSERespnse{}
 		json.Unmarshal(resp, results)
 		// POST redirect to avoid resubmit form
@@ -73,7 +80,14 @@ func main() {
 	router.GET("/result", func(c *gin.Context) {
 		q := c.Query("q")
 		startIndex, _ := strconv.Atoi(c.Query("startIndex"))
-		resp := search(q, startIndex)
+		resp, err := search(q, startIndex)
+		if err != nil {
+			fmt.Println(err)
+			c.HTML(http.StatusInternalServerError, "500.tmpl", gin.H{
+				"error": err,
+			})
+			return
+		}
 		results := &CSERespnse{}
 
 		json.Unmarshal(resp, results)
