@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 
@@ -43,7 +44,10 @@ type CSERespnse struct {
 }
 
 func main() {
+	// set run mode
+	initEnv()
 	initProxy()
+
 	router := gin.Default()
 	// load template file
 	router.LoadHTMLGlob("templates/*")
@@ -99,10 +103,35 @@ func main() {
 		})
 	})
 
+	router.POST("/result", func(c *gin.Context) {
+		query := c.PostForm("search")
+		resp, err := search(query, 1)
+		if err != nil {
+			fmt.Println(err)
+			c.HTML(http.StatusInternalServerError, "500.tmpl", gin.H{
+				"error": err,
+			})
+			return
+		}
+		results := &CSERespnse{}
+		json.Unmarshal(resp, results)
+		// POST redirect to avoid resubmit form
+		c.Redirect(http.StatusMovedPermanently, "/")
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"query_item": query,
+			"items":      results.Items,
+			"searchInfo": results.SearchInfo,
+			"results":    results,
+		})
+	})
+
 	router.Run() // listen and serve on 0.0.0.0:8080
 }
 
 func initProxy() {
+	if gin.Mode() != gin.DebugMode {
+		return
+	}
 	fmt.Println("init proxy")
 	// init proxy with script/setProxy.sh file
 	cmd := exec.Command("/bin/bash", "-c", "./script/setProxy.sh")
@@ -115,5 +144,17 @@ func initProxy() {
 		fmt.Printf("Error: %s\nErr msg: %s\n", err, stderr.String())
 	} else {
 		fmt.Printf("%s\n", out.String())
+	}
+}
+
+func initEnv() {
+	RUNMODE := os.Getenv("RUNMODE")
+	switch RUNMODE {
+	case "dev":
+		gin.SetMode(gin.DebugMode)
+	case "prod":
+		gin.SetMode(gin.ReleaseMode)
+	default:
+		gin.SetMode(gin.DebugMode)
 	}
 }
