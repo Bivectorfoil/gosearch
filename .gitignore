@@ -16,3 +16,8 @@
 
 # private files
 *.env
+gosearch
+
+# editor
+.idea/
+.vscode/
