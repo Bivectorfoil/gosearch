@@ -37,7 +37,7 @@ type Queries struct {
 	}
 }
 
-type CSERespnse struct {
+type CSEResponse struct {
 	Items      []Result          `json:"items"`
 	SearchInfo SearchInformation `json:"searchInformation"`
 	Queries    Queries           `json:"queries"`
@@ -67,8 +67,12 @@ func main() {
 			})
 			return
 		}
-		results := &CSERespnse{}
-		json.Unmarshal(resp, results)
+		results := &CSEResponse{}
+		err = json.Unmarshal(resp, results)
+		if err != nil {
+			render500ErrorResponse(c, err)
+			return
+		}
 		// POST redirect to avoid resubmit form
 		c.Redirect(http.StatusMovedPermanently, "/")
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
@@ -92,9 +96,13 @@ func main() {
 			})
 			return
 		}
-		results := &CSERespnse{}
+		results := &CSEResponse{}
 
-		json.Unmarshal(resp, results)
+		err = json.Unmarshal(resp, results)
+		if err != nil {
+			render500ErrorResponse(c, err)
+			return
+		}
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
 			"query_item": q,
 			"items":      results.Items,
@@ -113,8 +121,12 @@ func main() {
 			})
 			return
 		}
-		results := &CSERespnse{}
-		json.Unmarshal(resp, results)
+		results := &CSEResponse{}
+		err = json.Unmarshal(resp, results)
+		if err != nil {
+			render500ErrorResponse(c, err)
+			return
+		}
 		// POST redirect to avoid resubmit form
 		c.Redirect(http.StatusMovedPermanently, "/")
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
@@ -125,7 +137,21 @@ func main() {
 		})
 	})
 
-	router.Run() // listen and serve on 0.0.0.0:8080
+	err := router.Run()
+	if err != nil {
+		render500ErrorResponse(nil, err)
+		return
+	} // listen and serve on 0.0.0.0:8080
+}
+
+func render500ErrorResponse(c *gin.Context, err error) {
+	if c == nil {
+		c = &gin.Context{}
+	}
+	fmt.Println(err)
+	c.HTML(http.StatusInternalServerError, "500.tmpl", gin.H{
+		"error": err,
+	})
 }
 
 func initProxy() {
@@ -148,8 +174,8 @@ func initProxy() {
 }
 
 func initEnv() {
-	RUNMODE := os.Getenv("RUNMODE")
-	switch RUNMODE {
+	RunMode := os.Getenv("RUN_MODE")
+	switch RunMode {
 	case "dev":
 		gin.SetMode(gin.DebugMode)
 	case "prod":

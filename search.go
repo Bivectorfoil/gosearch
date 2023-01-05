@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const BASE_URL = "https://www.googleapis.com/customsearch/v1?"
+const baseURL = "https://www.googleapis.com/customsearch/v1?"
 
 func search(queryItem string, startIndex int) ([]byte, error) {
 	// read CSE_ID and CSE_KEY from .env file with godotenv package
@@ -38,7 +38,7 @@ func search(queryItem string, startIndex int) ([]byte, error) {
 	transport := &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 	client := &http.Client{Transport: transport}
 
-	rawUrl, err := url.Parse(BASE_URL + paramsToQuery(params))
+	rawUrl, err := url.Parse(baseURL + paramsToQuery(params))
 	if err != nil {
 		// log err and return
 		log.Print(err)
